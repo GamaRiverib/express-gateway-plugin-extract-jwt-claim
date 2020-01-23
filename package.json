@@ -1,0 +1,37 @@
+{
+  "name": "express-gateway-plugin-extract-jwt-claim",
+  "version": "0.1.0",
+  "description": "Express Gateway Plugin for validate JWT and place sub claim on request object",
+  "main": "manifest.js",
+  "private": true,
+  "engines": {
+    "node": "^10.15.3",
+    "npm": "^6.4.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "tsc": "tsc"
+  },
+  "keywords": [
+    "express-gateway",
+    "plugin",
+    "claim",
+    "JWT"
+  ],
+  "author": {
+    "name": "José Gamaliel Rivera Ibarra",
+    "email": "jgrivera@novutek.com"
+  },
+  "repository": {
+    "type": "git"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/jsonwebtoken": "8.3.7",
+    "tsc": "1.20150623.0",
+    "typescript": "3.4.3"
+  },
+  "dependencies": {
+    "jsonwebtoken": "8.5.1"
+  }
+}
