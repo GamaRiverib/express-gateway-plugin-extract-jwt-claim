@@ -1,14 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = require("jsonwebtoken");
+const fs_1 = require("fs");
 const name = "extract-jwt-claim";
 const schema = {
     $id: 'https://cloud.novutek.com/schemas/policies/extract-jwt-claim.json',
     type: 'object',
     properties: {
-        secretOrPublicKey: {
-            type: "object",
-            description: "Secret or public key to validate the JWT"
+        publicKeyFile: {
+            type: "string",
+            description: "Public key to validate the JWT"
         },
         verifyOptions: {
             type: "object",
@@ -19,9 +20,10 @@ const schema = {
             description: "Claim name which contains payload to place it on request object"
         }
     },
-    required: ["secretOrPublicKey"]
+    required: ["publicKeyFile"]
 };
 const policy = (params) => {
+    const publicKey = fs_1.readFileSync(params.publicKeyFile, { encoding: "utf-8" });
     return (req, res, next) => {
         if (!req.headers || !req.headers.authorization) {
             return res.status(401).send({ error: "MISSING_ACCESS_TOKEN_ERROR" });
@@ -30,8 +32,9 @@ const policy = (params) => {
             return res.status(401).send({ error: "SCHEMA_AUTHORIZATION_NOT_SUPPORTED_ERROR" });
         }
         const token = req.headers.authorization.split(" ")[1];
+        console.log({ params });
         try {
-            const json = jsonwebtoken_1.verify(token, params.secretOrPublicKey, params.verifyOptions);
+            const json = jsonwebtoken_1.verify(token, publicKey, params.verifyOptions);
             console.log({ jwt: json });
             req.subject = json.sub;
             if (params.payload) {
@@ -40,7 +43,7 @@ const policy = (params) => {
             next();
         }
         catch (error) {
-            // console.log(error);
+            console.log(error);
             // name: 'JsonWebTokenError', message: 'invalid algorithm'
             if (error && error.name && error.name === "TokenExpiredError") {
                 return res.status(401).send({ error: "TOKEN_EXPIRED_ERROR" });
@@ -49,11 +52,10 @@ const policy = (params) => {
         }
     };
 };
-const plugin = {
-    version: "0.1.0",
+module.exports = {
+    version: "1.0.0",
     policies: ["extract-jwt-claim"],
     init: (context) => {
         context.registerPolicy({ name, schema, policy });
     }
 };
-exports.default = plugin;
